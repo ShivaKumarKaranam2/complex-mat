@@ -1,0 +1,17 @@
+trigger:
+  branches:
+    include:
+      - '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - script: |
+      git remote add github https://$(GITHUB_USERNAME):$(GITHUB_TOKEN)@https://github.com/alumnx-ai-labs/complex-mat.git
+      git push github --all --force
+      git push github --tags --force
+    displayName: 'Mirror Azure Repo to GitHub'

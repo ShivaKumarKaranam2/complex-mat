@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meeting Action Tracker (MAT) — Mockup</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --panel:#ffffff; --border:#e1e5ea; --text:#1f2937; --muted:#6b7280;
+    --primary:#2f5496; --primary-dark:#1f3b6e; --primary-tint:#eaf0fb;
+    --green:#1a7f4e; --green-tint:#e7f6ee;
+    --amber:#9a6b00; --amber-tint:#fff4dd;
+    --gray:#6b7280; --gray-tint:#eef0f3;
+    --danger:#b3261e; --danger-tint:#fdecea;
+    --mention:#2f5496; --mention-tint:#e7edf9;
+    --ado:#6b4fa0; --ado-tint:#f1ecfa;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+
+  /* ---------- Login screen ---------- */
+  #screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .login-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:48px 40px;width:380px;text-align:center;box-shadow:0 6px 24px rgba(20,30,60,.08);}
+  .login-card h1{font-family:Georgia,'Times New Roman',serif;font-size:22px;margin:16px 0 4px;}
+  .login-card p{color:var(--muted);font-size:13px;margin:0 0 24px;}
+  .login-btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;}
+  .login-btn:hover{background:var(--primary-dark);}
+  .login-logo{width:48px;height:48px;border-radius:10px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;margin:0 auto;}
+  .login-note{margin-top:20px;font-size:11px;color:var(--muted);}
+
+  /* ---------- App shell ---------- */
+  #app-shell{display:none;min-height:100vh;}
+  #app-shell.active{display:flex;}
+  .sidebar{width:220px;background:var(--primary-dark);color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;}
+  .sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 20px 20px;font-weight:700;font-size:15px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:12px;}
+  .sidebar-brand .mark{width:28px;height:28px;border-radius:7px;background:#fff;color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-weight:800;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#d7defd;font-size:13.5px;text-decoration:none;cursor:pointer;border-left:3px solid transparent;}
+  .nav-item:hover{background:rgba(255,255,255,.06);}
+  .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:#fff;font-weight:600;}
+  .nav-item .badge{margin-left:auto;background:rgba(255,255,255,.18);border-radius:10px;padding:1px 7px;font-size:11px;}
+  .nav-section-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9fb0e0;padding:16px 20px 4px;}
+
+  .main-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar h2{font-size:16px;margin:0;}
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+  .user-badge{display:flex;align-items:center;gap:9px;}
+  .user-badge .avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .user-badge .who{line-height:1.25;}
+  .user-badge .who .uname{font-size:13px;font-weight:600;}
+  .user-badge .who .urole{font-size:11px;color:var(--muted);}
+  .signout-btn{border:1px solid var(--border);background:#fff;border-radius:6px;padding:6px 12px;font-size:12.5px;color:var(--text);}
+  .login-accounts{margin-top:18px;border-top:1px solid var(--border);padding-top:14px;text-align:left;}
+  .login-accounts .acct{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:3px 0;cursor:pointer;}
+  .login-accounts .acct:hover{color:var(--primary);}
+  .login-accounts .acct b{color:var(--text);}
+  .content{padding:24px;overflow-y:auto;flex:1;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- Generic UI bits ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;}
+  .card h3{margin:0 0 14px;font-size:14.5px;}
+  .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:600;}
+  .pill-owner{background:var(--primary-tint);color:var(--primary-dark);}
+  .pill-admin{background:var(--amber-tint);color:var(--amber);}
+  .pill-team{background:var(--gray-tint);color:var(--gray);}
+  .pill-active{background:var(--green-tint);color:var(--green);}
+  .pill-inactive{background:var(--danger-tint);color:var(--danger);}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--gray-tint);border-radius:999px;padding:4px 10px;font-size:12.5px;margin:2px 4px 2px 0;}
+  .btn{border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:600;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-secondary{background:#fff;border:1px solid var(--border);color:var(--text);}
+  .btn-disabled{background:var(--gray-tint);color:var(--muted);cursor:not-allowed;}
+  .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;display:block;}
+  .field-row{margin-bottom:16px;}
+  .text-input,.select-input,.textarea-input{width:100%;border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:13.5px;background:#fff;}
+  .textarea-input{min-height:70px;resize:vertical;}
+  .muted{color:var(--muted);font-size:12.5px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--border);padding:8px 10px;}
+  td{padding:10px 10px;border-bottom:1px solid var(--border);}
+
+  /* ---------- Calendar ---------- */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .cal-dow{background:#f0f2f6;padding:8px;font-size:11px;text-align:center;color:var(--muted);font-weight:600;}
+  .cal-day{background:#fff;min-height:84px;padding:6px;font-size:12px;position:relative;cursor:pointer;}
+  .cal-day:hover{background:#fbfcfe;}
+  .cal-day.empty{background:#fafafa;cursor:default;}
+  .cal-day .daynum{font-weight:600;color:var(--muted);}
+  .cal-meeting-pill{margin-top:5px;background:var(--primary-tint);color:var(--primary-dark);border-radius:5px;padding:3px 6px;font-size:11px;font-weight:600;display:block;cursor:pointer;}
+  .cal-meeting-pill:hover{background:#dbe6f8;}
+
+  /* ---------- Task board ---------- */
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .board-col{background:#f6f7f9;border-radius:10px;padding:12px;min-height:200px;}
+  .board-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px;}
+  .board-col-head .title{font-size:12.5px;font-weight:700;}
+  .count{background:#fff;border:1px solid var(--border);border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;color:var(--muted);}
+  .task-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;cursor:grab;box-shadow:0 1px 2px rgba(20,30,60,.04);}
+  .task-card:hover{border-color:#c7d2e5;}
+  .task-card.locked{opacity:.55;cursor:not-allowed;}
+  .task-card .t-meeting{font-size:10.5px;color:var(--primary);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.02em;}
+  .task-card .t-title{font-size:13px;font-weight:600;margin-bottom:6px;}
+  .task-card .t-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;}
+  .task-card .avatar{width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+  .task-card .ado-tag{display:inline-flex;align-items:center;gap:4px;background:var(--ado-tint);color:var(--ado);border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:600;margin-top:6px;}
+  .task-card .flag{display:inline-flex;align-items:center;gap:4px;background:var(--danger-tint);color:var(--danger);border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:600;margin-top:6px;}
+  .dz{outline:2px dashed transparent;border-radius:8px;transition:outline-color .15s;}
+  .dz.drag-over{outline-color:#9db3dd;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,20,35,.45);align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:50;}
+  .modal-overlay.active{display:flex;}
+  .modal{background:#fff;border-radius:12px;width:100%;max-width:560px;padding:0;box-shadow:0 20px 60px rgba(10,15,30,.25);}
+  .modal.wide{max-width:680px;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .modal-head h3{margin:0;font-size:15px;}
+  .modal-close{border:none;background:none;font-size:18px;color:var(--muted);line-height:1;}
+  .modal-body{padding:20px 22px;max-height:70vh;overflow-y:auto;}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+  /* ---------- Attendee/assignee search ---------- */
+  .search-box{position:relative;}
+  .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 20px rgba(10,15,30,.1);z-index:5;max-height:180px;overflow-y:auto;}
+  .search-results .opt{padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .search-results .opt:hover{background:var(--primary-tint);}
+  .search-results .opt .avatar{width:20px;height:20px;border-radius:50%;background:var(--gray);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+  /* ---------- Comments / mentions / ADO tokens ---------- */
+  .comment{border-top:1px solid var(--border);padding:12px 0;}
+  .comment:first-child{border-top:none;}
+  .comment .c-head{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;margin-bottom:4px;}
+  .comment .c-time{font-weight:400;color:var(--muted);font-size:11px;}
+  .comment .c-body{font-size:13px;line-height:1.5;}
+  .mention-tag{background:var(--mention-tint);color:var(--mention);font-weight:700;border-radius:4px;padding:0 4px;}
+  .ado-inline{background:var(--ado-tint);color:var(--ado);font-weight:700;border-radius:4px;padding:0 4px;}
+  .comment-compose{margin-top:14px;position:relative;}
+  .compose-hint{font-size:11px;color:var(--muted);margin-top:6px;}
+
+  .ado-ref-box{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;background:#fbfbfd;}
+  .ado-ref-box.unavailable{background:var(--gray-tint);}
+  .ado-ref-title{font-size:13px;font-weight:600;}
+  .ado-ref-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .locked-note{font-size:11.5px;color:var(--muted);background:var(--gray-tint);border-radius:6px;padding:8px 10px;margin-top:8px;}
+  .admin-only-note{font-size:12px;color:var(--muted);margin-bottom:14px;}
+
+  /* ---------- Login role cards ---------- */
+  .login-role-label{font-size:12px;color:var(--muted);margin:18px 0 8px;text-align:left;}
+  .login-role-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .login-role-card{border:1.5px solid var(--border);border-radius:9px;padding:12px 12px;text-align:left;cursor:pointer;background:#fff;transition:border-color .1s;}
+  .login-role-card:hover{border-color:#c7d2e5;}
+  .login-role-card.selected{border-color:var(--green);background:var(--green-tint);}
+  .login-role-card .r-title{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .login-role-card .r-desc{font-size:11.5px;color:var(--muted);line-height:1.4;}
+</style>
+</head>
+<body>
+
+<!-- =========================== LOGIN SCREEN =========================== -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">M</div>
+    <h1>Meeting Action Tracker</h1>
+    <p>Sign in with the Employee Mail ID and Password an Admin gave you.</p>
+
+    <div class="login-role-label">Continue as</div>
+    <div class="login-role-cards">
+      <div class="login-role-card" id="login-role-card-team" onclick="selectLoginRole('Team Member')">
+        <div class="r-title">Team Member</div>
+        <div class="r-desc">See your meetings, work your task board, comment on your tasks</div>
+      </div>
+      <div class="login-role-card selected" id="login-role-card-admin" onclick="selectLoginRole('Admin')">
+        <div class="r-title">Admin</div>
+        <div class="r-desc">Schedule meetings, assign tasks, manage people, track everyone's progress</div>
+      </div>
+    </div>
+
+    <div class="field-row" style="text-align:left;">
+      <span class="field-label">Employee Mail ID</span>
+      <input class="text-input" id="login-email" placeholder="e.g. john@organisation.example" value="john@organisation.example" />
+    </div>
+    <div class="field-row" style="text-align:left;">
+      <span class="field-label">Password</span>
+      <input class="text-input" id="login-password" type="password" placeholder="Password" value="Passw0rd!" />
+    </div>
+    <div id="login-error" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;">Incorrect Employee Mail ID or Password.</div>
+    <button class="login-btn" onclick="signIn()">Sign In</button>
+    <div class="login-note">Password for every sample account: Passw0rd! · Your account's actual Role always applies, whichever option is selected above.</div>
+    <div class="login-accounts">
+      <div class="acct" onclick="fillLogin('john@organisation.example','Admin')"><span>John</span><span><b>Admin</b> · john@organisation.example</span></div>
+      <div class="acct" onclick="fillLogin('priya@organisation.example','Admin')"><span>Priya</span><span><b>Admin</b> · priya@organisation.example</span></div>
+      <div class="acct" onclick="fillLogin('sarah@organisation.example','Team Member')"><span>Sarah</span><span><b>Team Member</b> · sarah@organisation.example</span></div>
+      <div class="acct" onclick="fillLogin('alex@organisation.example','Team Member')"><span>Alex (inactive)</span><span><b>Team Member</b> · alex@organisation.example</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== APP SHELL =========================== -->
+<div id="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-brand"><div class="mark">M</div> Meeting Action Tracker</div>
+    <div class="nav-item active" data-screen="calendar" onclick="showScreen('calendar')">📅 Calendar</div>
+    <div class="nav-item" data-screen="my-tasks" onclick="showScreen('my-tasks')">✅ My Tasks</div>
+    <div class="nav-item" data-screen="previous-meetings" onclick="showScreen('previous-meetings')">🗂 Previous Meetings</div>
+    <div class="nav-section-label" id="admin-nav-label">Admin</div>
+    <div class="nav-item admin-only" data-screen="people" onclick="showScreen('people')">👥 People</div>
+    <div class="nav-item admin-only" data-screen="activity-log" onclick="showScreen('activity-log')">📜 Activity Log</div>
+  </div>
+
+  <div class="main-col">
+    <div class="topbar">
+      <h2 id="topbar-title">Calendar</h2>
+      <div class="topbar-right">
+        <div class="user-badge">
+          <span class="avatar" id="user-badge-avatar">J</span>
+          <div class="who"><div class="uname" id="user-badge-name">John</div><div class="urole" id="user-badge-role">Admin</div></div>
+        </div>
+        <button class="signout-btn" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ---------------- CALENDAR ---------------- -->
+      <div class="screen active" id="screen-calendar">
+        <div class="card">
+          <h3>September 2026</h3>
+          <div class="cal-grid" id="cal-grid"><!-- populated by JS --></div>
+          <div class="hint" id="calendar-hint">Click any date to open <strong>Create Meeting</strong> prefilled with that date. Click an existing meeting pill to open <strong>Meeting Details</strong>.</div>
+        </div>
+      </div>
+
+      <!-- ---------------- MY TASKS ---------------- -->
+      <div class="screen" id="screen-my-tasks">
+        <div class="card">
+          <h3>My Tasks</h3>
+          <div class="hint" style="margin-top:0;margin-bottom:14px;">Every Task assigned to you, across all your Meetings. Drag a card to update its Status, or open a Task to comment.</div>
+          <div class="board" id="my-tasks-board"><!-- populated by JS --></div>
+        </div>
+      </div>
+
+      <!-- ---------------- PREVIOUS MEETINGS ---------------- -->
+      <div class="screen" id="screen-previous-meetings">
+        <div class="card">
+          <h3>Previous Meetings</h3>
+          <table>
+            <thead><tr><th>Title</th><th>Date</th><th>Meeting Owner</th><th>Tasks</th><th></th></tr></thead>
+            <tbody id="previous-meetings-rows"><!-- populated by JS --></tbody>
+          </table>
+          <div class="hint">Team Members only see meetings they are invited to as Attendees; Admins see all meetings.</div>
+        </div>
+      </div>
+
+      <!-- ---------------- PEOPLE (Admin only) ---------------- -->
+      <div class="screen" id="screen-people">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="margin:0;">People</h3>
+            <button class="btn btn-primary" onclick="openAddMember()">+ Add Member</button>
+          </div>
+          <div class="admin-only-note">There is no self-registration. An Admin adds every member here and shares their Employee Mail ID and Password with them directly. An Admin can also change a member's Role or reset their Password at any time.</div>
+          <table>
+            <thead><tr><th>Employee Name</th><th>Employee Mail ID</th><th>Employee ID</th><th>Role</th><th>Status</th><th></th></tr></thead>
+            <tbody id="people-rows"><!-- populated by JS --></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ---------------- ACTIVITY LOG (Admin only) ---------------- -->
+      <div class="screen" id="screen-activity-log">
+        <div class="card">
+          <h3>Activity Log</h3>
+          <table>
+            <thead><tr><th>Actor</th><th>Action</th><th>Timestamp</th></tr></thead>
+            <tbody id="activity-rows"><!-- populated by JS --></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ---------------- MEETING DETAILS ---------------- -->
+      <div class="screen" id="screen-meeting-details">
+        <div class="card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+            <div>
+              <h3 id="md-title" style="margin-bottom:6px;">Q3 Roadmap Review</h3>
+              <div class="muted" id="md-datetime">15 Sep 2026 · 10:00–11:00</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="pill pill-owner">Meeting Owner: <span id="md-owner">John</span></span>
+              <button class="btn btn-secondary" id="btn-edit-meeting" onclick="openEditMeeting()">Edit Meeting</button>
+              <button class="btn btn-secondary" id="btn-delete-meeting" onclick="deleteMeeting()" style="color:var(--danger);">Delete Meeting</button>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:16px;">
+            <span class="field-label">Attendees</span>
+            <div id="md-attendees"></div>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Agenda / Notes</span>
+            <div class="muted" id="md-agenda">Review roadmap milestones for Q3 and confirm follow-up action items.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h3 style="margin:0;">Task Board</h3>
+            <button class="btn btn-primary" id="btn-add-task" onclick="openNewTask()">+ Create Task</button>
+          </div>
+          <div class="board" id="task-board"><!-- populated by JS --></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- =========================== MODAL: CREATE MEETING =========================== -->
+<div class="modal-overlay" id="modal-create-meeting">
+  <div class="modal">
+    <div class="modal-head"><h3 id="cm-heading">Create Meeting</h3><button class="modal-close" onclick="closeModal('modal-create-meeting')">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <span class="field-label">Title</span>
+        <input class="text-input" id="cm-title" placeholder="e.g. Weekly Sync" />
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Date</span>
+          <input class="text-input" id="cm-date" readonly />
+          <div class="hint">Prefilled from the Calendar date you selected.</div>
+        </div>
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Time</span>
+          <input class="text-input" id="cm-time" placeholder="e.g. 14:00–15:00" />
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Attendees</span>
+        <div class="search-box">
+          <input class="text-input" id="cm-attendee-search" placeholder="Search internal members by Employee Name or Employee ID…" oninput="renderAttendeeSearch(this.value)" onfocus="renderAttendeeSearch(this.value)" />
+          <div class="search-results" id="cm-attendee-results" style="display:none;"></div>
+        </div>
+        <div id="cm-attendee-chips" style="margin-top:8px;"></div>
+        <div class="hint">Attendee search covers all internal workspace members.</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Agenda / Notes</span>
+        <textarea class="textarea-input" id="cm-agenda" placeholder="Agenda or notes for this meeting…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-create-meeting')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMeeting()">Save Meeting</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== MODAL: TASK DETAILS =========================== -->
+<div class="modal-overlay" id="modal-task-details">
+  <div class="modal wide">
+    <div class="modal-head"><h3 id="td-heading">Task Details</h3><button class="modal-close" onclick="closeModal('modal-task-details')">✕</button></div>
+    <div class="modal-body">
+
+      <div class="field-row">
+        <span class="field-label">Task Title</span>
+        <div class="search-box">
+          <input class="text-input" id="td-title" oninput="renderAtSuggestions('td-title','td-title-suggestions'); renderLinkedAdoItems();" onclick="renderAtSuggestions('td-title','td-title-suggestions')" onkeyup="renderAtSuggestions('td-title','td-title-suggestions')" />
+          <div class="search-results" id="td-title-suggestions" style="display:none;"></div>
+        </div>
+        <div class="hint">Type @ for internal member suggestions, or @ + a number for Azure DevOps Story/Feature suggestions.</div>
+      </div>
+
+      <div style="display:flex;gap:12px;">
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Assignee</span>
+          <div class="search-box">
+            <input class="text-input" id="td-assignee-search" placeholder="Search this meeting's attendees…" oninput="renderAssigneeSearch(this.value)" onfocus="renderAssigneeSearch(this.value)" />
+            <div class="search-results" id="td-assignee-results" style="display:none;"></div>
+          </div>
+          <div class="hint">Scoped to this Meeting's Attendees only — not the full workspace.</div>
+          <div class="locked-note" id="td-assignee-locked" style="display:none;">Only the Meeting Owner can assign or reassign this task.</div>
+        </div>
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Due Date</span>
+          <input class="text-input" id="td-duedate" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <span class="field-label">Status</span>
+        <select class="select-input" id="td-status">
+          <option>To Do</option>
+          <option>In Progress</option>
+          <option>Completed</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <span class="field-label">Description / Notes</span>
+        <div class="search-box">
+          <textarea class="textarea-input" id="td-desc" oninput="renderAtSuggestions('td-desc','td-desc-suggestions'); renderLinkedAdoItems();" onclick="renderAtSuggestions('td-desc','td-desc-suggestions')" onkeyup="renderAtSuggestions('td-desc','td-desc-suggestions')"></textarea>
+          <div class="search-results" id="td-desc-suggestions" style="display:none;"></div>
+        </div>
+        <div class="hint">Type @ for internal member suggestions, or @ + a number for Azure DevOps Story/Feature suggestions — same behaviour as Task Title and Comments.</div>
+      </div>
+
+      <div class="field-row">
+        <span class="field-label">Linked Azure DevOps Items</span>
+        <div id="td-ado-linked"></div>
+        <div class="hint">Auto-detected from any “@&lt;number&gt;” typed in the Task Title, Description/Notes, or Comments — there is no separate field to fill in.</div>
+      </div>
+
+      <div class="card" style="background:#fafbfc;">
+        <h3>Comments</h3>
+        <div id="td-comments"></div>
+        <div class="comment-compose">
+          <div class="search-box">
+            <textarea class="textarea-input" id="td-new-comment" placeholder="Write a comment… type @ to mention an internal member, e.g. @John, or reference Azure DevOps, e.g. @1234" oninput="renderAtSuggestions('td-new-comment','td-comment-suggestions')" onclick="renderAtSuggestions('td-new-comment','td-comment-suggestions')" onkeyup="renderAtSuggestions('td-new-comment','td-comment-suggestions')"></textarea>
+            <div class="search-results" id="td-comment-suggestions" style="display:none;position:relative;top:-2px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <div class="compose-hint">"@John" → internal member mention · "@1234" → Azure DevOps reference (unambiguous, distinct styling)</div>
+            <button class="btn btn-primary" onclick="postComment()">Post Comment</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="btn-delete-task" onclick="deleteTask()" style="color:var(--danger);margin-right:auto;">Delete Task</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-task-details')">Close</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== MODAL: ADD MEMBER =========================== -->
+<div class="modal-overlay" id="modal-add-member">
+  <div class="modal">
+    <div class="modal-head"><h3>Add Member</h3><button class="modal-close" onclick="closeModal('modal-add-member')">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <span class="field-label">Employee Name</span>
+        <input class="text-input" id="am-name" placeholder="e.g. Alex Rivera" />
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Employee Mail ID</span>
+          <input class="text-input" id="am-email" placeholder="e.g. alex@organisation.example" />
+        </div>
+        <div class="field-row" style="flex:1;">
+          <span class="field-label">Employee ID</span>
+          <input class="text-input" id="am-empid" placeholder="e.g. EMP-1042" />
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Password</span>
+        <input class="text-input" id="am-password" placeholder="Set an initial password" />
+        <div class="hint">Share this Employee Mail ID and Password with the member directly — MAT does not email credentials.</div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Role</span>
+        <select class="select-input" id="am-role">
+          <option value="Team Member">Team Member</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+      <div id="am-error" style="display:none;color:var(--danger);font-size:12px;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-member')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== TOAST (email notification demo) =========================== -->
+<div id="toast" style="display:none;position:fixed;bottom:22px;right:22px;background:#1f2937;color:#fff;padding:12px 16px;border-radius:8px;font-size:12.5px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:80;"></div>
+
+<script>
+/* =========================================================================
+   Mock data — reflects only the screens/fields/statuses/actions/roles
+   documented in BRD.docx. All data is illustrative sample data.
+   ========================================================================= */
+
+var USERS = {
+  john:  { id:'john',  name:'John',  email:'john@organisation.example',  employeeId:'EMP-1001', password:'Passw0rd!', role:'Admin',       active:true  },
+  sarah: { id:'sarah', name:'Sarah', email:'sarah@organisation.example', employeeId:'EMP-1002', password:'Passw0rd!', role:'Team Member', active:true  },
+  priya: { id:'priya', name:'Priya', email:'priya@organisation.example', employeeId:'EMP-1003', password:'Passw0rd!', role:'Admin',       active:true  },
+  alex:  { id:'alex',  name:'Alex',  email:'alex@organisation.example',  employeeId:'EMP-1004', password:'Passw0rd!', role:'Team Member', active:false },
+};
+
+var MEETINGS = {
+  m1: {
+    id:'m1', title:'Q3 Roadmap Review', date:'15 Sep 2026', time:'10:00–11:00',
+    ownerId:'john', attendeeIds:['john','sarah','priya','alex'],
+    agenda:'Review roadmap milestones for Q3 and confirm follow-up action items.',
+    taskIds:['t1','t2','t3','t4'],
+  },
+  m2: {
+    id:'m2', title:'Sprint Planning', date:'01 Sep 2026', time:'09:00–09:45',
+    ownerId:'john', attendeeIds:['john','sarah','priya'],
+    agenda:'Plan next sprint scope and confirm owners for carry-over items.',
+    taskIds:['t5','t6','t7'],
+  }
+};
+
+var TASKS = {
+  t1: {
+    id:'t1', meetingId:'m1', title:'Prepare onboarding API design doc',
+    desc:'Draft the design for the customer onboarding API, aligned with @1234.',
+    assigneeId:'sarah', dueDate:'20 Sep 2026', status:'In Progress',
+    comments:[
+      { authorId:'sarah', time:'16 Sep, 09:12', text:[{t:'Started drafting the design doc, will share by EOD. '},{mention:'John'},{t:' can you confirm the auth approach follows '},{ado:'1234'},{t:'?'}] },
+      { authorId:'john', time:'16 Sep, 10:40', text:[{t:'Yes — follow the flow described in '},{ado:'1234'},{t:'. Loop in '},{mention:'Priya'},{t:' for the security review.'}] },
+    ],
+  },
+  t2: {
+    id:'t2', meetingId:'m1', title:'Review security requirements',
+    desc:'Confirm security requirements for the onboarding flow before implementation.',
+    assigneeId:'priya', dueDate:'22 Sep 2026', status:'To Do',
+    comments:[],
+  },
+  t3: {
+    id:'t3', meetingId:'m1', title:'Update stakeholder deck',
+    desc:'Refresh the roadmap slides for the stakeholder readout, tracked under @987.',
+    assigneeId:'john', dueDate:'10 Sep 2026', status:'Completed',
+    comments:[
+      { authorId:'john', time:'10 Sep, 17:05', text:[{t:'Deck updated and shared. Closing this out.'}] },
+    ],
+  },
+  t4: {
+    id:'t4', meetingId:'m1', title:'Coordinate legacy migration notes',
+    desc:'Capture migration notes from the legacy system for reference.',
+    assigneeId:'alex', dueDate:'18 Sep 2026', status:'To Do',
+    comments:[],
+  },
+  t5: { id:'t5', meetingId:'m2', title:'Finalise sprint backlog', desc:'Confirm final backlog order.', assigneeId:'sarah', dueDate:'02 Sep 2026', status:'Completed', comments:[] },
+  t6: { id:'t6', meetingId:'m2', title:'Capacity planning', desc:'Confirm team capacity for the sprint.', assigneeId:'priya', dueDate:'02 Sep 2026', status:'Completed', comments:[] },
+  t7: { id:'t7', meetingId:'m2', title:'Carry-over bug triage', desc:'Triage carried-over bugs from last sprint.', assigneeId:'john', dueDate:'03 Sep 2026', status:'In Progress', comments:[] },
+};
+
+var ADO_CATALOG = [
+  { id:1234, title:'Implement customer onboarding API', type:'Story', area:'Platform / Onboarding' },
+  { id:1235, title:'Design onboarding error states', type:'Story', area:'Platform / Onboarding' },
+  { id:988,  title:'Self-service password reset', type:'Feature', area:'Identity' },
+  { id:1401, title:'Meeting action item export', type:'Story', area:'Productivity Tools' },
+];
+
+var ACTIVITY_LOG = [
+  { actor:'John',  action:'Created Meeting "Q3 Roadmap Review"',      time:'12 Sep 2026, 09:02' },
+  { actor:'John',  action:'Assigned Task "Prepare onboarding API design doc" to Sarah', time:'12 Sep 2026, 09:05' },
+  { actor:'Sarah', action:'Posted comment on "Prepare onboarding API design doc" (mentioned John)', time:'16 Sep 2026, 09:12' },
+  { actor:'John',  action:'Attached Azure DevOps reference ADO #1234 to "Prepare onboarding API design doc"', time:'12 Sep 2026, 09:06' },
+  { actor:'John',  action:'Deactivated member Alex', time:'11 Sep 2026, 14:20' },
+  { actor:'System',action:'Task "Coordinate legacy migration notes" flagged — assignee inactive', time:'11 Sep 2026, 14:20' },
+  { actor:'John',  action:'Deleted Meeting "Kickoff Retro" (cascade-deleted 2 tasks)', time:'05 Sep 2026, 11:47' },
+  { actor:'John',  action:'Added member Priya (Role: Admin)', time:'02 Sep 2026, 08:30' },
+  { actor:'John',  action:'Added member Alex (Role: Team Member)', time:'02 Sep 2026, 08:41' },
+];
+
+/* =========================================================================
+   Application state
+   ========================================================================= */
+
+var currentUserId = 'john';
+var activeMeetingId = null;
+var activeTaskId = null;
+
+function currentUser(){ return USERS[currentUserId]; }
+function isAdmin(){ return currentUser().role === 'Admin'; }
+function isMeetingOwner(meetingId){ return MEETINGS[meetingId].ownerId === currentUserId; }
+
+function initials(name){ return name.slice(0,1).toUpperCase(); }
+
+/* =========================================================================
+   Login / sign-in
+   ========================================================================= */
+
+var selectedLoginRole = 'Admin';
+function selectLoginRole(role){
+  selectedLoginRole = role;
+  document.getElementById('login-role-card-team').classList.toggle('selected', role === 'Team Member');
+  document.getElementById('login-role-card-admin').classList.toggle('selected', role === 'Admin');
+}
+function fillLogin(email, role){
+  document.getElementById('login-email').value = email;
+  document.getElementById('login-password').value = 'Passw0rd!';
+  if(role) selectLoginRole(role);
+}
+
+function signIn(){
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const credMatch = Object.values(USERS).find(u => u.email.toLowerCase() === email && u.password === password);
+  const errEl = document.getElementById('login-error');
+  if(!credMatch){
+    errEl.textContent = 'Incorrect Employee Mail ID or Password.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!credMatch.active){
+    errEl.textContent = 'This account has been deactivated by an Admin and can no longer sign in.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const match = credMatch;
+  errEl.style.display = 'none';
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('app-shell').classList.add('active');
+  setCurrentUser(match.id);
+  showScreen('calendar');
+}
+function signOut(){
+  document.getElementById('app-shell').classList.remove('active');
+  document.getElementById('screen-login').style.display = 'flex';
+}
+
+function setCurrentUser(id){
+  currentUserId = id;
+  const u = currentUser();
+  document.getElementById('user-badge-avatar').textContent = initials(u.name);
+  document.getElementById('user-badge-name').textContent = u.name;
+  document.getElementById('user-badge-role').textContent = u.role;
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display = isAdmin() ? 'flex' : 'none';
+  });
+  document.getElementById('admin-nav-label').style.display = isAdmin() ? 'block' : 'none';
+  renderCalendar();
+  renderMyTasks();
+  renderPreviousMeetings();
+  renderPeople();
+  renderActivityLog();
+  if(activeMeetingId){
+    if(canAccessMeeting(activeMeetingId)) renderMeetingDetails(activeMeetingId);
+    else { activeMeetingId = null; showScreen('calendar'); }
+  }
+}
+
+/* =========================================================================
+   Navigation
+   ========================================================================= */
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const target = document.getElementById('screen-' + name);
+  if(target) target.classList.add('active');
+  const navItem = document.querySelector('.nav-item[data-screen="'+name+'"]');
+  if(navItem) navItem.classList.add('active');
+  const titles = { calendar:'Calendar', 'my-tasks':'My Tasks', 'previous-meetings':'Previous Meetings', people:'People', 'activity-log':'Activity Log' };
+  if(titles[name]) document.getElementById('topbar-title').textContent = titles[name];
+}
+
+function canAccessMeeting(id){
+  const m = MEETINGS[id];
+  if(!m) return false;
+  return isAdmin() || m.attendeeIds.includes(currentUserId);
+}
+
+function openMeeting(id){
+  if(!canAccessMeeting(id)){
+    showToast('You are not invited to this meeting, so it is not available to you.');
+    return;
+  }
+  activeMeetingId = id;
+  renderMeetingDetails(id);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-meeting-details').classList.add('active');
+  document.getElementById('topbar-title').textContent = MEETINGS[id].title;
+}
+
+/* =========================================================================
+   Calendar rendering
+   ========================================================================= */
+
+function visibleMeetings(){
+  return Object.values(MEETINGS).filter(m => isAdmin() || m.attendeeIds.includes(currentUserId));
+}
+
+function renderCalendar(){
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+    const el = document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
+  });
+  // September 2026 starts on a Tuesday
+  const firstDow = 2, daysInMonth = 30;
+  const meetingsByDate = {};
+  visibleMeetings().forEach(m=>{
+    const day = parseInt(m.date.split(' ')[0],10);
+    meetingsByDate[day] = meetingsByDate[day] || [];
+    meetingsByDate[day].push(m);
+  });
+  for(let i=0;i<firstDow;i++){
+    const el=document.createElement('div'); el.className='cal-day empty'; grid.appendChild(el);
+  }
+  for(let day=1; day<=daysInMonth; day++){
+    const el=document.createElement('div'); el.className='cal-day';
+    el.innerHTML = '<div class="daynum">'+day+'</div>';
+    if(isAdmin()) el.onclick = ()=>openCreateMeeting(day);
+    (meetingsByDate[day]||[]).forEach(m=>{
+      const pill=document.createElement('div');
+      pill.className='cal-meeting-pill';
+      pill.textContent=m.title;
+      pill.onclick=(e)=>{ e.stopPropagation(); openMeeting(m.id); };
+      el.appendChild(pill);
+    });
+    grid.appendChild(el);
+  }
+  const hintEl = document.getElementById('calendar-hint');
+  if(hintEl){
+    hintEl.innerHTML = isAdmin()
+      ? 'Click any date to open <strong>Create Meeting</strong> prefilled with that date. Click an existing meeting pill to open <strong>Meeting Details</strong>.'
+      : 'Only Admins can create meetings. Click an existing meeting pill to open <strong>Meeting Details</strong>. You only see meetings you are invited to.';
+  }
+}
+
+function renderPreviousMeetings(){
+  const rows = document.getElementById('previous-meetings-rows');
+  const meetings = visibleMeetings().slice().sort((a,b)=> parseInt(a.date,10) - parseInt(b.date,10));
+  if(meetings.length===0){
+    rows.innerHTML = '<tr><td colspan="5" class="muted">No meetings available to you yet.</td></tr>';
+    return;
+  }
+  rows.innerHTML = meetings.map(m=>
+    '<tr><td>'+m.title+'</td><td>'+m.date+'</td>'
+    + '<td><span class="pill pill-owner">'+USERS[m.ownerId].name+'</span></td>'
+    + '<td>'+m.taskIds.length+' tasks</td>'
+    + '<td><button class="btn btn-secondary" onclick="openMeeting(\''+m.id+'\')">Open Meeting Details</button></td></tr>'
+  ).join('');
+}
+
+var editingMeetingId = null;
+
+function openCreateMeeting(day){
+  if(!isAdmin()){ showToast('Only Admins can create meetings.'); return; }
+  editingMeetingId = null;
+  document.getElementById('cm-heading').textContent = 'Create Meeting';
+  document.getElementById('cm-title').value='';
+  document.getElementById('cm-date').value = day + ' Sep 2026';
+  document.getElementById('cm-time').value='';
+  document.getElementById('cm-agenda').value='';
+  document.getElementById('cm-attendee-search').value='';
+  document.getElementById('cm-attendee-chips').innerHTML='';
+  document.getElementById('cm-attendee-chips').dataset.ids = JSON.stringify([currentUserId]);
+  renderAttendeeChips();
+  document.getElementById('modal-create-meeting').classList.add('active');
+}
+
+function openEditMeeting(){
+  if(!isAdmin()){ showToast('Only Admins can edit meetings.'); return; }
+  const m = MEETINGS[activeMeetingId];
+  editingMeetingId = m.id;
+  document.getElementById('cm-heading').textContent = 'Edit Meeting';
+  document.getElementById('cm-title').value = m.title;
+  document.getElementById('cm-date').value = m.date;
+  document.getElementById('cm-time').value = m.time;
+  document.getElementById('cm-agenda').value = m.agenda;
+  document.getElementById('cm-attendee-search').value='';
+  document.getElementById('cm-attendee-chips').dataset.ids = JSON.stringify(m.attendeeIds.slice());
+  renderAttendeeChips();
+  document.getElementById('modal-create-meeting').classList.add('active');
+}
+
+function deleteMeeting(){
+  if(!isAdmin()) return;
+  const m = MEETINGS[activeMeetingId];
+  if(!window.confirm('Delete "'+m.title+'"? This will also delete all of its Tasks.')) return;
+  const taskCount = m.taskIds.length;
+  m.taskIds.forEach(tid => delete TASKS[tid]);
+  delete MEETINGS[m.id];
+  ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Deleted Meeting "'+m.title+'" (cascade-deleted '+taskCount+' task'+(taskCount===1?'':'s')+')', time:'Just now' });
+  activeMeetingId = null;
+  renderCalendar();
+  renderPreviousMeetings();
+  renderActivityLog();
+  showScreen('calendar');
+  showToast('Meeting deleted along with its '+taskCount+' task(s).');
+}
+
+function renderAttendeeSearch(query){
+  const box = document.getElementById('cm-attendee-results');
+  const chosen = JSON.parse(document.getElementById('cm-attendee-chips').dataset.ids || '[]');
+  const q=(query||'').toLowerCase();
+  const matches = Object.values(USERS).filter(u=>u.active && !chosen.includes(u.id) && u.name.toLowerCase().includes(q));
+  if(matches.length===0){ box.style.display='none'; return; }
+  box.innerHTML = matches.map(u=>
+    '<div class="opt" onclick="addAttendee(\''+u.id+'\')"><span class="avatar">'+initials(u.name)+'</span>'+u.name+' <span class="muted" style="margin-left:auto;">'+u.role+'</span></div>'
+  ).join('');
+  box.style.display='block';
+}
+function addAttendee(id){
+  const el = document.getElementById('cm-attendee-chips');
+  const ids = JSON.parse(el.dataset.ids || '[]');
+  if(!ids.includes(id)) ids.push(id);
+  el.dataset.ids = JSON.stringify(ids);
+  document.getElementById('cm-attendee-search').value='';
+  document.getElementById('cm-attendee-results').style.display='none';
+  renderAttendeeChips();
+}
+function renderAttendeeChips(){
+  const el = document.getElementById('cm-attendee-chips');
+  const ids = JSON.parse(el.dataset.ids || '[]');
+  const ownerId = editingMeetingId ? MEETINGS[editingMeetingId].ownerId : currentUserId;
+  el.innerHTML = ids.map(id=>{
+    const locked = id === ownerId;
+    return '<span class="chip">'+USERS[id].name+(locked?' (Owner)':'')
+      + (locked ? '' : ' <span style="cursor:pointer;color:var(--muted);" onclick="removeAttendee(\''+id+'\')">✕</span>')
+      + '</span>';
+  }).join('');
+}
+function removeAttendee(id){
+  const el = document.getElementById('cm-attendee-chips');
+  let ids = JSON.parse(el.dataset.ids || '[]');
+  ids = ids.filter(x=>x!==id);
+  el.dataset.ids = JSON.stringify(ids);
+  renderAttendeeChips();
+}
+
+function saveMeeting(){
+  const title = document.getElementById('cm-title').value.trim() || 'Untitled Meeting';
+  const date = document.getElementById('cm-date').value;
+  const time = document.getElementById('cm-time').value.trim();
+  const agenda = document.getElementById('cm-agenda').value.trim();
+  const attendeeIds = JSON.parse(document.getElementById('cm-attendee-chips').dataset.ids || '[]');
+
+  if(editingMeetingId){
+    const m = MEETINGS[editingMeetingId];
+    m.title = title; m.time = time; m.agenda = agenda; m.attendeeIds = attendeeIds;
+    ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Edited Meeting "'+title+'"', time:'Just now' });
+    closeModal('modal-create-meeting');
+    renderCalendar();
+    renderPreviousMeetings();
+    renderActivityLog();
+    openMeeting(m.id);
+    showToast('Meeting "'+title+'" updated.');
+  } else {
+    const id = 'm' + (Object.keys(MEETINGS).length + 1 + Math.floor(Math.random()*1000));
+    if(!attendeeIds.includes(currentUserId)) attendeeIds.unshift(currentUserId);
+    MEETINGS[id] = { id, title, date, time, ownerId: currentUserId, attendeeIds, agenda, taskIds: [] };
+    ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Created Meeting "'+title+'"', time:'Just now' });
+    closeModal('modal-create-meeting');
+    renderCalendar();
+    renderPreviousMeetings();
+    renderActivityLog();
+    openMeeting(id);
+    showToast('Meeting "'+title+'" created. You are the Meeting Owner.');
+  }
+}
+
+/* =========================================================================
+   Meeting details / task board rendering
+   ========================================================================= */
+
+function renderMeetingDetails(meetingId){
+  const m = MEETINGS[meetingId];
+  document.getElementById('md-title').textContent = m.title;
+  document.getElementById('md-datetime').textContent = m.date + ' · ' + m.time;
+  document.getElementById('md-owner').textContent = USERS[m.ownerId].name;
+  document.getElementById('md-agenda').textContent = m.agenda;
+  document.getElementById('md-attendees').innerHTML = m.attendeeIds.map(id=>{
+    const u = USERS[id];
+    return '<span class="chip">'+u.name+(u.id===m.ownerId?' (Owner)':'')+(!u.active?' — inactive':'')+'</span>';
+  }).join('');
+
+  document.getElementById('btn-add-task').style.display = isMeetingOwner(meetingId) ? 'inline-block' : 'none';
+  document.getElementById('btn-edit-meeting').style.display = isAdmin() ? 'inline-block' : 'none';
+  document.getElementById('btn-delete-meeting').style.display = isAdmin() ? 'inline-block' : 'none';
+
+  const tasks = m.taskIds.map(id=>TASKS[id]).filter(Boolean);
+  document.getElementById('task-board').innerHTML = boardColumnsHtml(tasks, false);
+}
+
+function boardColumnsHtml(tasks, showMeeting){
+  const cols = [ ['To Do','todo'], ['In Progress','inprogress'], ['Completed','completed'] ];
+  return cols.map(([label,key])=>{
+    const colTasks = tasks.filter(t=>statusKey(t.status)===key);
+    return '<div class="board-col dz" data-status="'+key+'" ondragover="onDragOver(event)" ondrop="onDrop(event,\''+key+'\')" ondragleave="onDragLeave(event)">'
+      + '<div class="board-col-head"><span class="title">'+label+'</span><span class="count">'+colTasks.length+'</span></div>'
+      + colTasks.map(t=>taskCardHtml(t, showMeeting)).join('')
+      + '</div>';
+  }).join('');
+}
+
+function renderMyTasks(){
+  const el = document.getElementById('my-tasks-board');
+  if(!el) return;
+  const myTasks = Object.values(TASKS).filter(t => t.assigneeId === currentUserId && MEETINGS[t.meetingId]);
+  el.innerHTML = boardColumnsHtml(myTasks, true);
+}
+
+function refreshTaskViews(){
+  if(activeMeetingId && MEETINGS[activeMeetingId] && document.getElementById('screen-meeting-details').classList.contains('active')){
+    renderMeetingDetails(activeMeetingId);
+  }
+  renderMyTasks();
+}
+
+function statusKey(status){
+  return status==='To Do' ? 'todo' : status==='In Progress' ? 'inprogress' : 'completed';
+}
+
+function canDragTask(t){
+  return currentUserId === t.assigneeId || isAdmin();
+}
+
+function needsReassignment(t){
+  const m = MEETINGS[t.meetingId];
+  const assignee = USERS[t.assigneeId];
+  return !assignee.active || !m.attendeeIds.includes(t.assigneeId);
+}
+
+function collectAdoIdsFromText(text){
+  const ids = [];
+  ((text||'').match(/@(\d+)/g)||[]).forEach(tok=>{ const id=tok.slice(1); if(!ids.includes(id)) ids.push(id); });
+  return ids;
+}
+function linkedAdoItemsForTask(t){
+  const ids = [];
+  collectAdoIdsFromText(t.title).forEach(id=>{ if(!ids.includes(id)) ids.push(id); });
+  collectAdoIdsFromText(t.desc).forEach(id=>{ if(!ids.includes(id)) ids.push(id); });
+  t.comments.forEach(c=> c.text.forEach(part=>{ if(part.ado && !ids.includes(part.ado)) ids.push(part.ado); }));
+  return ids.map(id=>{
+    const item = ADO_CATALOG.find(a=>String(a.id)===String(id));
+    return item ? { id:item.id, title:item.title, type:item.type, available:true } : { id, available:false };
+  });
+}
+
+function taskCardHtml(t, showMeeting){
+  const assignee = USERS[t.assigneeId];
+  const draggable = canDragTask(t);
+  const linked = linkedAdoItemsForTask(t);
+  let adoTag = '';
+  if(linked.length){
+    const unavailable = linked.find(l=>!l.available);
+    const extra = linked.length>1 ? ' (+'+(linked.length-1)+' more)' : '';
+    adoTag = unavailable
+      ? '<div class="flag">⚠ ADO #'+unavailable.id+' unavailable'+extra+'</div>'
+      : '<div class="ado-tag">ADO #'+linked[0].id+extra+'</div>';
+  }
+  const reassignFlag = needsReassignment(t) ? '<div class="flag">⚠ Assignee needs reassignment (inactive or no longer an attendee)</div>' : '';
+  const meetingLabel = showMeeting ? '<div class="t-meeting">'+MEETINGS[t.meetingId].title+'</div>' : '';
+  return '<div class="task-card'+(draggable?'':' locked')+'" draggable="'+draggable+'" ondragstart="onDragStart(event,\''+t.id+'\')" onclick="openTask(\''+t.id+'\')">'
+    + meetingLabel
+    + '<div class="t-title">'+t.title+'</div>'
+    + '<div class="t-meta"><span>Due '+t.dueDate+' · Comments ('+t.comments.length+')</span><span class="avatar" title="'+assignee.name+'">'+initials(assignee.name)+'</span></div>'
+    + adoTag + reassignFlag
+    + '</div>';
+}
+
+var dragTaskId = null;
+function onDragStart(e,taskId){
+  const t = TASKS[taskId];
+  if(!canDragTask(t)){ e.preventDefault(); return; }
+  dragTaskId = taskId;
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', taskId); } catch(err) { /* ignore, dragTaskId is the source of truth */ }
+}
+function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function onDrop(e, statusKeyName){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const taskId = dragTaskId || e.dataTransfer.getData('text/plain');
+  if(!taskId || !TASKS[taskId]) return;
+  if(!canDragTask(TASKS[taskId])){ showToast('You can only move your own Tasks.'); dragTaskId = null; return; }
+  const map = { todo:'To Do', inprogress:'In Progress', completed:'Completed' };
+  TASKS[taskId].status = map[statusKeyName];
+  dragTaskId = null;
+  refreshTaskViews();
+}
+
+/* =========================================================================
+   Task modal
+   ========================================================================= */
+
+function openTask(taskId){
+  if(!canAccessMeeting(TASKS[taskId].meetingId)){
+    showToast('You do not have access to this task.');
+    return;
+  }
+  activeTaskId = taskId;
+  const t = TASKS[taskId];
+  document.getElementById('td-heading').textContent = t.title;
+  document.getElementById('td-title').value = t.title;
+  document.getElementById('td-desc').value = t.desc;
+  document.getElementById('td-duedate').value = t.dueDate;
+  document.getElementById('td-status').value = t.status;
+  document.getElementById('td-assignee-search').value = USERS[t.assigneeId].name;
+  document.getElementById('td-assignee-results').style.display='none';
+  document.getElementById('td-title-suggestions').style.display='none';
+  document.getElementById('td-desc-suggestions').style.display='none';
+  document.getElementById('td-new-comment').value = '';
+
+  const ownerControl = isMeetingOwner(t.meetingId);
+  document.getElementById('td-assignee-search').disabled = !ownerControl;
+  document.getElementById('td-assignee-locked').style.display = ownerControl ? 'none' : 'block';
+
+  const canEditFields = isAdmin() || isMeetingOwner(t.meetingId);
+  const canEditStatusDesc = canEditFields || currentUserId === t.assigneeId;
+  ['td-title','td-duedate'].forEach(id=> document.getElementById(id).disabled = !canEditFields);
+  ['td-status','td-desc'].forEach(id=> document.getElementById(id).disabled = !canEditStatusDesc);
+  document.querySelector('#modal-task-details .modal-foot .btn-primary').style.display = canEditStatusDesc ? 'inline-block' : 'none';
+  document.getElementById('btn-delete-task').style.display = canEditFields ? 'inline-block' : 'none';
+
+  const canComment = isAdmin() || isMeetingOwner(t.meetingId) || currentUserId === t.assigneeId;
+  document.getElementById('td-new-comment').disabled = !canComment;
+  document.getElementById('td-new-comment').placeholder = canComment
+    ? 'Write a comment… type @ to mention an internal member, e.g. @John, or reference Azure DevOps, e.g. @1234'
+    : 'Only the Meeting Owner, the Assignee, or an Admin can comment on this task.';
+  document.querySelector('.comment-compose .btn-primary').style.display = canComment ? 'inline-block' : 'none';
+
+  renderLinkedAdoItems();
+  renderComments(t);
+  openModal('modal-task-details');
+}
+
+function openNewTask(){
+  const m = MEETINGS[activeMeetingId];
+  if(!isMeetingOwner(activeMeetingId)){ showToast('Only the Meeting Owner can create and assign Tasks for this meeting.'); return; }
+  const id = 't' + Date.now();
+  TASKS[id] = { id, meetingId:activeMeetingId, title:'New Task', desc:'', assigneeId:m.attendeeIds[0], dueDate:'', status:'To Do', comments:[] };
+  m.taskIds.push(id);
+  renderMeetingDetails(activeMeetingId);
+  openTask(id);
+}
+
+function renderAssigneeSearch(query){
+  const box = document.getElementById('td-assignee-results');
+  const t = TASKS[activeTaskId];
+  const m = MEETINGS[t.meetingId];
+  const q=(query||'').toLowerCase();
+  const matches = m.attendeeIds.map(id=>USERS[id]).filter(u=>u.active && u.name.toLowerCase().includes(q));
+  if(matches.length===0){ box.style.display='none'; return; }
+  box.innerHTML = matches.map(u=>
+    '<div class="opt" onclick="chooseAssignee(\''+u.id+'\')"><span class="avatar">'+initials(u.name)+'</span>'+u.name+' <span class="muted" style="margin-left:auto;">Attendee</span></div>'
+  ).join('');
+  box.style.display='block';
+}
+function chooseAssignee(id){
+  document.getElementById('td-assignee-search').value = USERS[id].name;
+  document.getElementById('td-assignee-results').style.display='none';
+  TASKS[activeTaskId].assigneeId = id;
+}
+
+function renderLinkedAdoItems(){
+  const t = TASKS[activeTaskId];
+  const el = document.getElementById('td-ado-linked');
+  if(!t) return;
+  const draft = { title: document.getElementById('td-title').value, desc: document.getElementById('td-desc').value, comments: t.comments };
+  const linked = linkedAdoItemsForTask(draft);
+  if(linked.length===0){ el.innerHTML = '<div class="muted" style="font-size:12.5px;">None detected yet — type “@” followed by a number in the Title, Description/Notes, or a Comment.</div>'; return; }
+  el.innerHTML = linked.map(item=>
+    '<div class="ado-ref-box'+(item.available?'':' unavailable')+'" style="margin-bottom:8px;">'
+    + '<div><div class="ado-ref-title">ADO #'+item.id+(item.available?' — '+item.title:'')+'</div>'
+    + '<div class="ado-ref-sub">'+(item.available ? item.type : 'No longer accessible')+'</div></div>'
+    + '<button class="btn '+(item.available?'btn-secondary':'btn-disabled')+'" '+(item.available?'onclick="window.alert(\'Would open ADO #'+item.id+' in Azure DevOps.\')"':'disabled')+'>Open in Azure DevOps</button>'
+    + '</div>'
+  ).join('');
+}
+
+function renderComments(t){
+  const el = document.getElementById('td-comments');
+  if(t.comments.length===0){ el.innerHTML='<div class="muted" style="font-size:12.5px;">No comments yet.</div>'; return; }
+  el.innerHTML = t.comments.map(c=>{
+    const author = USERS[c.authorId];
+    const body = c.text.map(part=>{
+      if(part.t) return escapeHtml(part.t);
+      if(part.mention) return '<span class="mention-tag">@'+part.mention+'</span>';
+      if(part.ado) return '<span class="ado-inline">@'+part.ado+'</span>';
+      return '';
+    }).join('');
+    return '<div class="comment"><div class="c-head">'+author.name+' <span class="c-time">'+c.time+'</span></div><div class="c-body">'+body+'</div></div>';
+  }).join('');
+}
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function postComment(){
+  const t = TASKS[activeTaskId];
+  const canComment = isAdmin() || isMeetingOwner(t.meetingId) || currentUserId === t.assigneeId;
+  if(!canComment){ showToast('Only the Meeting Owner, the Assignee, or an Admin can comment on this task.'); return; }
+  const text = document.getElementById('td-new-comment').value.trim();
+  if(!text) return;
+  const m = MEETINGS[t.meetingId];
+  const parts = [];
+  const tokens = text.split(/(\@[A-Za-z0-9]+)/g);
+  tokens.forEach(tok=>{
+    const asAdo = /^@(\d+)$/.exec(tok);
+    const asName = /^@([A-Za-z]+)$/.exec(tok);
+    if(asAdo) parts.push({ado: asAdo[1]});
+    else if(asName && m.attendeeIds.some(id=>USERS[id].name===asName[1])) parts.push({mention: asName[1]});
+    else if(tok) parts.push({t: tok});
+  });
+  t.comments.push({ authorId: currentUserId, time:'Just now', text: parts });
+  document.getElementById('td-new-comment').value='';
+  document.getElementById('td-comment-suggestions').style.display='none';
+  renderComments(t);
+  renderLinkedAdoItems();
+  refreshTaskViews();
+  ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Posted comment on Task "'+t.title+'"', time:'Just now' });
+  renderActivityLog();
+
+  const assignee = USERS[t.assigneeId];
+  if(assignee.id !== currentUserId){
+    showToast('Email notification sent to '+assignee.name+': new comment on "'+t.title+'".');
+  }
+  parts.filter(p=>p.mention).forEach(p=>{
+    showToast('Email notification sent to '+p.mention+': mentioned in a comment on "'+t.title+'".');
+  });
+}
+
+function saveTask(){
+  const t = TASKS[activeTaskId];
+  const canEditFields = isAdmin() || isMeetingOwner(t.meetingId);
+  const canEditStatusDesc = canEditFields || currentUserId === t.assigneeId;
+  if(!canEditStatusDesc){ closeModal('modal-task-details'); return; }
+  if(canEditFields){
+    t.title = document.getElementById('td-title').value;
+    t.dueDate = document.getElementById('td-duedate').value;
+  }
+  t.desc = document.getElementById('td-desc').value;
+  t.status = document.getElementById('td-status').value;
+  ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Updated Task "'+t.title+'" (Status: '+t.status+')', time:'Just now' });
+  closeModal('modal-task-details');
+  refreshTaskViews();
+  renderActivityLog();
+}
+
+function deleteTask(){
+  const t = TASKS[activeTaskId];
+  if(!(isAdmin() || isMeetingOwner(t.meetingId))) return;
+  if(!window.confirm('Delete Task "'+t.title+'"?')) return;
+  const m = MEETINGS[t.meetingId];
+  m.taskIds = m.taskIds.filter(id=>id!==t.id);
+  delete TASKS[t.id];
+  ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Deleted Task "'+t.title+'"', time:'Just now' });
+  closeModal('modal-task-details');
+  refreshTaskViews();
+  renderActivityLog();
+  showToast('Task deleted.');
+}
+
+/* =========================================================================
+   Live "@" suggestions inside the comment box (members + Azure DevOps)
+   ========================================================================= */
+
+function currentMentionToken(textarea){
+  const pos = textarea.selectionStart;
+  const before = textarea.value.slice(0, pos);
+  const match = before.match(/@([A-Za-z0-9]*)$/);
+  if(!match) return null;
+  return { token: match[1], start: pos - match[0].length, end: pos };
+}
+
+function renderAtSuggestions(fieldId, boxId){
+  const field = document.getElementById(fieldId);
+  const box = document.getElementById(boxId);
+  const info = currentMentionToken(field);
+  if(!info){ box.style.display='none'; return; }
+  const t = TASKS[activeTaskId];
+  const m = MEETINGS[t.meetingId];
+  const q = info.token.toLowerCase();
+  const showAdo = /^\d+$/.test(info.token);
+
+  let html = '';
+  if(!showAdo){
+    const members = m.attendeeIds.map(id=>USERS[id]).filter(u=>u.active && u.name.toLowerCase().includes(q));
+    if(members.length){
+      html += '<div style="padding:6px 10px 2px;font-size:10.5px;color:var(--muted);text-transform:uppercase;">Internal Members (this meeting)</div>';
+      html += members.map(u=>'<div class="opt" onclick="insertAtToken(\''+fieldId+'\',\''+boxId+'\',\'@'+u.name+'\')"><span class="avatar">'+initials(u.name)+'</span>@'+u.name+' <span class="muted" style="margin-left:auto;">'+u.role+'</span></div>').join('');
+    }
+  } else {
+    const items = ADO_CATALOG.filter(a => String(a.id).includes(q));
+    if(items.length){
+      html += '<div style="padding:6px 10px 2px;font-size:10.5px;color:var(--muted);text-transform:uppercase;">Azure DevOps Stories &amp; Features</div>';
+      html += items.map(a=>'<div class="opt" onclick="insertAtToken(\''+fieldId+'\',\''+boxId+'\',\'@'+a.id+'\')"><span class="id" style="font-weight:700;color:var(--ado);margin-right:6px;">#'+a.id+'</span>'+a.title+' <span class="muted" style="margin-left:auto;">'+a.type+'</span></div>').join('');
+    }
+  }
+  if(!html){ box.style.display='none'; return; }
+  box.innerHTML = html;
+  box.style.display='block';
+}
+
+function insertAtToken(fieldId, boxId, token){
+  const field = document.getElementById(fieldId);
+  const info = currentMentionToken(field);
+  if(!info) return;
+  const value = field.value;
+  const newValue = value.slice(0, info.start) + token + ' ' + value.slice(info.end);
+  field.value = newValue;
+  const caret = info.start + token.length + 1;
+  field.focus();
+  field.setSelectionRange(caret, caret);
+  document.getElementById(boxId).style.display='none';
+  if(fieldId === 'td-title' || fieldId === 'td-desc') renderLinkedAdoItems();
+}
+
+/* =========================================================================
+   People / Activity Log rendering
+   ========================================================================= */
+
+function renderPeople(){
+  const rows = document.getElementById('people-rows');
+  rows.innerHTML = Object.values(USERS).map(u=>{
+    const roleCell = isAdmin()
+      ? '<select class="select-input" style="padding:5px 8px;font-size:12.5px;" onchange="changeRole(\''+u.id+'\', this.value)">'
+        + '<option value="Team Member"'+(u.role==='Team Member'?' selected':'')+'>Team Member</option>'
+        + '<option value="Admin"'+(u.role==='Admin'?' selected':'')+'>Admin</option>'
+        + '</select>'
+      : '<span class="pill '+(u.role==='Admin'?'pill-admin':'pill-team')+'">'+u.role+'</span>';
+    const actions = isAdmin()
+      ? '<button class="btn btn-secondary" onclick="resetPassword(\''+u.id+'\')" style="margin-right:6px;">Reset Password</button>'
+        + '<button class="btn btn-secondary" onclick="toggleActive(\''+u.id+'\')">'+(u.active?'Deactivate':'Reactivate')+'</button>'
+      : '';
+    return '<tr><td>'+u.name+'</td><td>'+u.email+'</td><td>'+u.employeeId+'</td>'
+      + '<td>'+roleCell+'</td>'
+      + '<td><span class="pill '+(u.active?'pill-active':'pill-inactive')+'">'+(u.active?'Active':'Inactive')+'</span></td>'
+      + '<td>'+actions+'</td></tr>';
+  }).join('');
+}
+function toggleActive(id){
+  USERS[id].active = !USERS[id].active;
+  renderPeople();
+  showToast((USERS[id].active?'Reactivated ':'Deactivated ')+USERS[id].name+'. Ownership/assignment continuity rules applied where relevant.');
+}
+function changeRole(id, role){
+  USERS[id].role = role;
+  renderPeople();
+  showToast('Role for '+USERS[id].name+' changed to '+role+'. Takes effect on their next access.');
+}
+function resetPassword(id){
+  const newPassword = 'Temp' + Math.floor(1000 + Math.random()*9000) + '!';
+  USERS[id].password = newPassword;
+  showToast('Password reset for '+USERS[id].name+'. Share the new password ('+newPassword+') with them directly — not emailed automatically.');
+}
+
+/* =========================================================================
+   Add Member
+   ========================================================================= */
+
+function openAddMember(){
+  document.getElementById('am-name').value = '';
+  document.getElementById('am-email').value = '';
+  document.getElementById('am-empid').value = '';
+  document.getElementById('am-password').value = '';
+  document.getElementById('am-role').value = 'Team Member';
+  document.getElementById('am-error').style.display = 'none';
+  openModal('modal-add-member');
+}
+function saveMember(){
+  const name = document.getElementById('am-name').value.trim();
+  const email = document.getElementById('am-email').value.trim();
+  const employeeId = document.getElementById('am-empid').value.trim();
+  const password = document.getElementById('am-password').value;
+  const role = document.getElementById('am-role').value;
+  const errEl = document.getElementById('am-error');
+
+  if(!name || !email || !employeeId || !password){
+    errEl.textContent = 'Employee Name, Employee Mail ID, Employee ID, and Password are all required.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const emailTaken = Object.values(USERS).some(u => u.email.toLowerCase() === email.toLowerCase());
+  const empIdTaken = Object.values(USERS).some(u => u.employeeId.toLowerCase() === employeeId.toLowerCase());
+  if(emailTaken || empIdTaken){
+    errEl.textContent = 'That Employee Mail ID or Employee ID is already registered to another member.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const id = 'u' + (Object.keys(USERS).length + 1);
+  USERS[id] = { id, name, email, employeeId, password, role, active:true };
+  ACTIVITY_LOG.unshift({ actor: currentUser().name, action:'Added member '+name+' (Role: '+role+')', time:'Just now' });
+  closeModal('modal-add-member');
+  renderPeople();
+  renderActivityLog();
+  showToast('Member '+name+' created. Share their Employee Mail ID ('+email+') and Password with them directly.');
+}
+
+function renderActivityLog(){
+  const rows = document.getElementById('activity-rows');
+  rows.innerHTML = ACTIVITY_LOG.map(e=>'<tr><td>'+e.actor+'</td><td>'+e.action+'</td><td>'+e.time+'</td></tr>').join('');
+}
+
+/* =========================================================================
+   Modal helpers + toast
+   ========================================================================= */
+
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = '✉ ' + msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.display='none'; }, 3800);
+}
+
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.search-box')){
+    document.querySelectorAll('.search-results').forEach(b=>b.style.display='none');
+  }
+});
+
+/* =========================================================================
+   Boot
+   ========================================================================= */
+renderCalendar();
+renderPreviousMeetings();
+renderPeople();
+renderActivityLog();
+</script>
+</body>
+</html>
