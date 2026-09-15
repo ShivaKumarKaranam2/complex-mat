@@ -1,0 +1,32 @@
+# Python
+*__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+backend/mat.db
+backend/e2e-test.db
+
+# Node / frontend
+node_modules/
+dist/
+build/
+*.log
+coverage/
+.pyc
+.pyo
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+# Env files
+.env
+.env.local
+.venv/
+# Editors / OS
+.DS_Store
+Thumbs.db
+*.swp
