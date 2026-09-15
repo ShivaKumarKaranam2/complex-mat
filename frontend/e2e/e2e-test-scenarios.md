@@ -55,6 +55,19 @@ Note: this environment seeds only a single default Admin (also the Meeting Owner
 
 Known gaps (backend-tested already, not reachable via this UI with a single seeded user): "any Admin, not just the Owner, can edit" (scenario 1) can't be distinguished from the Owner themselves without a second Admin account; removing an Attendee to flag their Task as "needs reassignment" (scenario 2) isn't reachable at all — `MeetingForm` passes `lockedIds={[ownerId]}` to `AttendeeSearchInput`, so the sole attendee (the Owner) can never be removed from the Edit Meeting form.
 
+## `people-management.spec.ts` — People management (User Story 9)
+
+| Scenario | Expectation |
+| --- | --- |
+| Admin adds a member (Name, Mail ID, Employee ID, Password, Role) | Appears in the People table; the member can sign in with those credentials; they don't see People/Activity Log nav and a direct visit to `/people` is redirected away |
+| Admin changes an existing member's Role (Team Member → Admin) | On their next sign-in, People/Activity Log nav is now visible to them |
+| Admin resets a member's Password | Their old Password is rejected ("Incorrect Employee Mail ID or Password."); the new one signs them in |
+| Admin deactivates a member | They can no longer sign in; they no longer appear in attendee search on Create Meeting |
+| Admin reactivates that member | They can sign in again; they reappear in attendee search |
+| Admin deactivates a member who owns a Meeting | That Meeting's Owner becomes the workspace's default Admin ("John Admin") |
+
+This is the one story that actually creates a second real user account, so — uniquely in this suite — the "a Team Member/non-Admin can't do X" checks here use a genuine second session (a separate browser context logged in as the newly created member), not the sessionStorage role-swap trick used everywhere else in this suite for the same kind of check.
+
 ## `task-assignment-notifications.spec.ts` — Assignment notifications (User Story 6)
 
 | Scenario | Expectation |
