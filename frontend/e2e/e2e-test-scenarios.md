@@ -55,6 +55,16 @@ Note: this environment seeds only a single default Admin (also the Meeting Owner
 
 Known gaps (backend-tested already, not reachable via this UI with a single seeded user): "any Admin, not just the Owner, can edit" (scenario 1) can't be distinguished from the Owner themselves without a second Admin account; removing an Attendee to flag their Task as "needs reassignment" (scenario 2) isn't reachable at all — `MeetingForm` passes `lockedIds={[ownerId]}` to `AttendeeSearchInput`, so the sole attendee (the Owner) can never be removed from the Edit Meeting form.
 
+## `activity-log.spec.ts` — Activity Log (User Story 10)
+
+| Scenario | Expectation |
+| --- | --- |
+| A Team Member views the nav / visits `/activity-log` directly | No Activity Log link; direct navigation is redirected away |
+| Admin creates a Meeting, creates a Task, and adds a Member | Each appears as its own row: "Meeting Created (Meeting #id)", "Task Created (Task #id)", "Member Added (User #id)", each with actor "John Admin" |
+| Admin deletes a Meeting (cascading its Tasks) | A "Meeting Deleted (Meeting #id)" row is recorded |
+
+Like `people-management.spec.ts`, the "Team Member can't reach Activity Log" check here uses a genuine second account (created via the People screen), not the sessionStorage role-swap trick used elsewhere in this suite.
+
 ## `people-management.spec.ts` — People management (User Story 9)
 
 | Scenario | Expectation |
